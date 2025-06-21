@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
-import 'package:kouzinty/src/models/user_model.dart';
-import 'package:kouzinty/src/services/dish_service.dart';
-import 'package:kouzinty/src/services/auth_service.dart';
-import 'package:kouzinty/src/widgets/dish_card.dart';
-import 'package:kouzinty/src/widgets/error_widget.dart';
-import 'package:kouzinty/src/widgets/empty_state_widget.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/user_model.dart';
+import 'package:kouzinti/src/services/dish_service.dart';
+import 'package:kouzinti/src/services/auth_service.dart';
+import 'package:kouzinti/src/widgets/dish_card.dart';
+import 'package:kouzinti/src/widgets/error_widget.dart';
+import 'package:kouzinti/src/widgets/empty_state_widget.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
 
 class ChefProfileScreen extends StatelessWidget {
   final String chefId;
@@ -116,7 +116,7 @@ class ChefProfileScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 12.0,
                     mainAxisSpacing: 12.0,
-                    childAspectRatio: 0.75,
+                    childAspectRatio: 0.8,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {

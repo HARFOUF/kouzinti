@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
-import 'package:kouzinty/src/services/dish_service.dart';
-import 'package:kouzinty/src/services/category_service.dart';
-import 'package:kouzinty/src/models/category_model.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
+import 'package:kouzinti/src/services/dish_service.dart';
+import 'package:kouzinti/src/services/category_service.dart';
+import 'package:kouzinti/src/models/category_model.dart';
 
 class EditDishScreen extends StatefulWidget {
   final DishModel? dish;

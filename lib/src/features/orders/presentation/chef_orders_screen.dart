@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kouzinty/src/models/order_model.dart';
-import 'package:kouzinty/src/services/order_service.dart';
-import 'package:kouzinty/src/features/orders/presentation/order_detail_screen.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
-import 'package:kouzinty/src/widgets/error_widget.dart';
-import 'package:kouzinty/src/widgets/empty_state_widget.dart';
+import 'package:kouzinti/src/models/order_model.dart';
+import 'package:kouzinti/src/services/order_service.dart';
+import 'package:kouzinti/src/features/orders/presentation/order_detail_screen.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
+import 'package:kouzinti/src/widgets/error_widget.dart';
+import 'package:kouzinti/src/widgets/empty_state_widget.dart';
 
 class ChefOrdersScreen extends StatelessWidget {
   const ChefOrdersScreen({super.key});

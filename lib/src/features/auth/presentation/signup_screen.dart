@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kouzinty/src/features/home/presentation/home_screen.dart';
+import 'package:kouzinti/src/features/home/presentation/home_screen.dart';
 
 enum UserRole { client, chef }
 

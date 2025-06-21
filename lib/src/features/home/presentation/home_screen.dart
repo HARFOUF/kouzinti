@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/features/cart/presentation/cart_screen.dart';
-import 'package:kouzinty/src/features/profile/presentation/profile_screen.dart';
-import 'package:kouzinty/src/features/home/presentation/chef_profile_screen.dart';
-import 'package:kouzinty/src/features/home/presentation/category_dishes_screen.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
-import 'package:kouzinty/src/models/user_model.dart';
-import 'package:kouzinty/src/models/category_model.dart';
-import 'package:kouzinty/src/services/dish_service.dart';
-import 'package:kouzinty/src/services/auth_service.dart';
-import 'package:kouzinty/src/services/category_service.dart';
-import 'package:kouzinty/src/widgets/dish_card.dart';
-import 'package:kouzinty/src/widgets/category_card.dart';
-import 'package:kouzinty/src/widgets/error_widget.dart';
-import 'package:kouzinty/src/widgets/empty_state_widget.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
+import 'package:kouzinti/src/features/cart/presentation/cart_screen.dart';
+import 'package:kouzinti/src/features/profile/presentation/profile_screen.dart';
+import 'package:kouzinti/src/features/home/presentation/chef_profile_screen.dart';
+import 'package:kouzinti/src/features/home/presentation/category_dishes_screen.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/user_model.dart';
+import 'package:kouzinti/src/models/category_model.dart';
+import 'package:kouzinti/src/services/dish_service.dart';
+import 'package:kouzinti/src/services/auth_service.dart';
+import 'package:kouzinti/src/services/category_service.dart';
+import 'package:kouzinti/src/widgets/dish_card.dart';
+import 'package:kouzinti/src/widgets/category_card.dart';
+import 'package:kouzinti/src/widgets/error_widget.dart';
+import 'package:kouzinti/src/widgets/empty_state_widget.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -209,22 +209,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.75,
+                  childAspectRatio: 0.8,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final dish = filteredResults[index];
                     return DishCard(
                       dish: dish,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => ChefProfileScreen(
-                              chefId: dish.chefId,
-                              chefName: 'Chef',
+                      onTap: () async {
+                        // Fetch the actual chef's name
+                        final chef = await _authService.getUserById(dish.chefId);
+                        final chefName = chef?.name ?? 'Unknown Chef';
+                        if (context.mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ChefProfileScreen(
+                                chefId: dish.chefId,
+                                chefName: chefName,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       },
                       canAddToCart: true,
                     );
@@ -262,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Categories Section
         SliverToBoxAdapter(
           child: Container(
-            padding: const EdgeInsets.only(left: 16, bottom: 8),
+            padding: const EdgeInsets.all(16),
             child: Text(
               'Categories',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -305,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: EmptyStateWidget(
-                    title: 'No Categories',
+                    title: 'No Categories Available',
                     message: 'Categories will appear here once they are added.',
                     icon: Icons.category_outlined,
                     iconColor: Colors.grey,
@@ -325,112 +330,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
                     final category = categories[index];
-                    return CategoryCard(
-                      category: category,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => CategoryDishesScreen(
-                              category: category,
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            );
-          },
-        ),
-
-        // Popular Dishes Section
-        SliverToBoxAdapter(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Most Popular',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ),
-        StreamBuilder<List<DishModel>>(
-          stream: _categoryService.getPopularDishes(limit: 6),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              );
-            }
-
-            if (snapshot.hasError) {
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ErrorStateWidget(
-                    message: 'Failed to load popular dishes: ${snapshot.error}',
-                    onRetry: () {
-                      // Stream will automatically retry
-                    },
-                  ),
-                ),
-              );
-            }
-
-            final popularDishes = snapshot.data ?? [];
-            
-            // Filter out dishes created by the current user
-            final filteredPopularDishes = currentUser != null 
-                ? popularDishes.where((dish) => dish.chefId != currentUser.id).toList()
-                : popularDishes;
-
-            if (filteredPopularDishes.isEmpty) {
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: EmptyStateWidget(
-                    title: 'No Popular Dishes',
-                    message: 'Popular dishes will appear here based on order count.',
-                    icon: Icons.trending_up_outlined,
-                    iconColor: Colors.orange,
-                    backgroundColor: Colors.orange[50],
-                    showAnimation: false,
-                  ),
-                ),
-              );
-            }
-
-            return SliverToBoxAdapter(
-              child: SizedBox(
-                height: 280,
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: filteredPopularDishes.length,
-                  itemBuilder: (context, index) {
-                    final dish = filteredPopularDishes[index];
                     return Container(
-                      width: 200,
+                      width: 120,
                       margin: const EdgeInsets.only(right: 16),
-                      child: DishCard(
-                        dish: dish,
+                      child: CategoryCard(
+                        category: category,
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => ChefProfileScreen(
-                                chefId: dish.chefId,
-                                chefName: 'Chef',
-                              ),
+                              builder: (context) => CategoryDishesScreen(category: category),
                             ),
                           );
                         },
-                        canAddToCart: true,
                       ),
                     );
                   },
@@ -516,22 +427,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.75,
+                  childAspectRatio: 0.8,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final dish = dishes[index];
                     return DishCard(
                       dish: dish,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => ChefProfileScreen(
-                              chefId: dish.chefId,
-                              chefName: 'Chef',
+                      onTap: () async {
+                        // Fetch the actual chef's name
+                        final chef = await _authService.getUserById(dish.chefId);
+                        final chefName = chef?.name ?? 'Unknown Chef';
+                        if (context.mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ChefProfileScreen(
+                                chefId: dish.chefId,
+                                chefName: chefName,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       },
                       canAddToCart: true,
                     );

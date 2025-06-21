@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
 
 class DishService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

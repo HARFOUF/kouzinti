@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:kouzinty/src/models/cart_item_model.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/cart_item_model.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
 
 class CartService with ChangeNotifier {
   final Map<String, CartItem> _items = {};

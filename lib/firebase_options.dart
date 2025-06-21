@@ -66,7 +66,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1036643763303',
     projectId: 'kouzinti-40bcd',
     storageBucket: 'kouzinti-40bcd.firebasestorage.app',
-    iosBundleId: 'com.example.kouzinty',
+    iosBundleId: 'com.example.kouzinti',
   );
 
 } 

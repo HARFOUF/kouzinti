@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/features/orders/presentation/checkout_screen.dart';
-import 'package:kouzinty/src/services/cart_service.dart';
-import 'package:kouzinty/src/widgets/empty_state_widget.dart';
+import 'package:kouzinti/src/features/orders/presentation/checkout_screen.dart';
+import 'package:kouzinti/src/services/cart_service.dart';
+import 'package:kouzinti/src/widgets/empty_state_widget.dart';
 import 'package:provider/provider.dart';
 
 class CartScreen extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kouzinty/src/models/category_model.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/category_model.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
 
 class CategoryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -101,64 +101,22 @@ class CategoryService {
 
       final categories = [
         {
-          'name': 'Pizza',
-          'icon': 'local_pizza',
-          'color': '#FF6B35',
-          'description': 'Delicious pizzas with various toppings',
-        },
-        {
-          'name': 'Burgers',
-          'icon': 'lunch_dining',
-          'color': '#FF8C42',
-          'description': 'Juicy burgers and sandwiches',
-        },
-        {
-          'name': 'Pasta',
-          'icon': 'ramen_dining',
-          'color': '#FFD93D',
-          'description': 'Italian pasta dishes',
-        },
-        {
-          'name': 'Sushi',
-          'icon': 'set_meal',
-          'color': '#6BCF7F',
-          'description': 'Fresh sushi and Japanese cuisine',
-        },
-        {
-          'name': 'Desserts',
-          'icon': 'cake',
-          'color': '#FF6B9D',
-          'description': 'Sweet treats and desserts',
-        },
-        {
-          'name': 'Coffee',
-          'icon': 'coffee',
+          'name': 'Traditional',
+          'icon': 'restaurant',
           'color': '#8B4513',
-          'description': 'Hot and cold coffee beverages',
+          'description': 'Traditional Algerian dishes and classics',
         },
         {
-          'name': 'Salads',
-          'icon': 'rice_bowl',
-          'color': '#4CAF50',
-          'description': 'Fresh and healthy salads',
-        },
-        {
-          'name': 'Seafood',
-          'icon': 'dinner_dining',
-          'color': '#2196F3',
-          'description': 'Fresh seafood dishes',
-        },
-        {
-          'name': 'Breakfast',
-          'icon': 'breakfast_dining',
-          'color': '#FF9800',
-          'description': 'Morning meals and brunch',
+          'name': 'Pastries',
+          'icon': 'bakery_dining',
+          'color': '#FF6B9D',
+          'description': 'Sweet Algerian pastries and desserts',
         },
         {
           'name': 'Drinks',
           'icon': 'local_bar',
-          'color': '#9C27B0',
-          'description': 'Refreshing beverages and cocktails',
+          'color': '#00BCD4',
+          'description': 'Traditional Algerian drinks and beverages',
         },
       ];
 
@@ -170,7 +128,7 @@ class CategoryService {
       }
 
       await batch.commit();
-      print('Categories initialized successfully');
+      print('Algerian categories initialized successfully');
     } catch (e) {
       print('Error initializing categories: $e');
       throw Exception('Failed to initialize categories: $e');

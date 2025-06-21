@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/models/category_model.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
+import 'package:kouzinti/src/models/category_model.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
 
 class CategoryCard extends StatefulWidget {
   final CategoryModel category;

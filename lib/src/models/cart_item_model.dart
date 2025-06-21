@@ -1,4 +1,4 @@
-import 'package:kouzinty/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
 
 class CartItem {
   final DishModel dish;

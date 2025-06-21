@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/services/cart_service.dart';
-import 'package:kouzinty/src/services/order_service.dart';
+import 'package:kouzinti/src/services/cart_service.dart';
+import 'package:kouzinti/src/services/order_service.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutScreen extends StatefulWidget {

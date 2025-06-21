@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kouzinty/src/features/profile/presentation/edit_dish_screen.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
-import 'package:kouzinty/src/services/dish_service.dart';
-import 'package:kouzinty/src/widgets/empty_state_widget.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
+import 'package:kouzinti/src/features/profile/presentation/edit_dish_screen.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
+import 'package:kouzinti/src/services/dish_service.dart';
+import 'package:kouzinti/src/widgets/empty_state_widget.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
 
 class ManageDishesScreen extends StatelessWidget {
   const ManageDishesScreen({super.key});

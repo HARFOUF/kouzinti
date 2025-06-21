@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/features/auth/presentation/login_screen.dart';
-import 'package:kouzinty/src/features/auth/presentation/signup_screen.dart';
-import 'package:kouzinty/src/features/orders/presentation/chef_orders_screen.dart';
-import 'package:kouzinty/src/features/orders/presentation/my_orders_screen.dart';
-import 'package:kouzinty/src/features/profile/presentation/manage_dishes_screen.dart';
-import 'package:kouzinty/src/features/profile/presentation/edit_profile_screen.dart';
-import 'package:kouzinty/src/models/user_model.dart';
-import 'package:kouzinty/src/services/auth_service.dart';
-import 'package:kouzinty/src/widgets/empty_state_widget.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
-import 'package:kouzinty/src/services/sample_data_service.dart';
+import 'package:kouzinti/src/features/auth/presentation/login_screen.dart';
+import 'package:kouzinti/src/features/auth/presentation/signup_screen.dart';
+import 'package:kouzinti/src/features/orders/presentation/chef_orders_screen.dart';
+import 'package:kouzinti/src/features/orders/presentation/my_orders_screen.dart';
+import 'package:kouzinti/src/features/profile/presentation/manage_dishes_screen.dart';
+import 'package:kouzinti/src/features/profile/presentation/edit_profile_screen.dart';
+import 'package:kouzinti/src/models/user_model.dart';
+import 'package:kouzinti/src/services/auth_service.dart';
+import 'package:kouzinti/src/widgets/empty_state_widget.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
+import 'package:kouzinti/src/services/sample_data_service.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -162,15 +162,15 @@ class ProfileScreen extends StatelessWidget {
                 // Sample data generation button (for testing)
                 ListTile(
                   leading: const Icon(Icons.data_usage, color: Colors.blue),
-                  title: const Text('Generate Sample Data', style: TextStyle(color: Colors.blue)),
-                  subtitle: const Text('Add 5 chefs and 50 dishes for testing'),
+                  title: const Text('Generate Algerian Sample Data', style: TextStyle(color: Colors.blue)),
+                  subtitle: const Text('Add 5 Algerian chefs and 25 traditional dishes'),
                   onTap: () async {
                     // Show confirmation dialog
                     final shouldGenerate = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Generate Sample Data'),
-                        content: const Text('This will add 5 chefs and 50 dishes to the database. Continue?'),
+                        title: const Text('Generate Algerian Sample Data'),
+                        content: const Text('This will add 5 Algerian chefs and 25 traditional Algerian dishes to the database. Continue?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
@@ -191,7 +191,7 @@ class ProfileScreen extends StatelessWidget {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Sample data generated successfully!'),
+                              content: Text('Algerian sample data generated successfully!'),
                               backgroundColor: Colors.green,
                             ),
                           );

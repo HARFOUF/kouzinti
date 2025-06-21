@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kouzinty/src/features/auth/presentation/signup_screen.dart';
-import 'package:kouzinty/src/features/home/presentation/home_screen.dart';
+import 'package:kouzinti/src/features/auth/presentation/signup_screen.dart';
+import 'package:kouzinti/src/features/home/presentation/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

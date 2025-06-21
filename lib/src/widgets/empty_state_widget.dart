@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/constants/app_colors.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final String title;

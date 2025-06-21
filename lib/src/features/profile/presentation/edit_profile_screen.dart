@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kouzinty/src/models/user_model.dart';
-import 'package:kouzinty/src/services/auth_service.dart';
+import 'package:kouzinti/src/models/user_model.dart';
+import 'package:kouzinti/src/services/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel user;

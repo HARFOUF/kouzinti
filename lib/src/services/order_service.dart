@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kouzinty/src/models/order_model.dart';
-import 'package:kouzinty/src/models/cart_item_model.dart';
+import 'package:kouzinti/src/models/order_model.dart';
+import 'package:kouzinti/src/models/cart_item_model.dart';
 
 class OrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

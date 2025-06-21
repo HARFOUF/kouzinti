@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kouzinty/src/models/cart_item_model.dart';
-import 'package:kouzinty/src/models/dish_model.dart';
+import 'package:kouzinti/src/models/cart_item_model.dart';
+import 'package:kouzinti/src/models/dish_model.dart';
 
 class OrderModel {
   final String id;
