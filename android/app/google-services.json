@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1036643763303",
+    "project_id": "kouzinti-40bcd",
+    "storage_bucket": "kouzinti-40bcd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036643763303:android:c9292f578b335dd9ac80c2",
+        "android_client_info": {
+          "package_name": "com.example.kouzinty"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgLMbAcj6_7jxJzIib74x2-G7S7WmcOI0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
