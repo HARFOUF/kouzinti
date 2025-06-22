@@ -47,20 +47,14 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthService>(
       builder: (context, authService, child) {
-        print('🏠 AuthWrapper: isLoading=${authService.isLoading}, isAuthenticated=${authService.isAuthenticated}');
-        print('🏠 AuthWrapper: currentUser=${authService.currentUser?.name}');
-        
         if (authService.isLoading) {
-          print('🏠 AuthWrapper: Showing splash screen');
           return const SplashScreen();
         }
         
         if (authService.isAuthenticated) {
-          print('🏠 AuthWrapper: User authenticated, showing HomeScreen');
           return const HomeScreen();
         }
         
-        print('🏠 AuthWrapper: User not authenticated, showing LoginScreen');
         return const LoginScreen();
       },
     );

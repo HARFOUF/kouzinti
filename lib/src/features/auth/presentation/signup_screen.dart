@@ -39,7 +39,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
       return methods.isNotEmpty;
     } catch (e) {
-      debugPrint('Error checking email: $e');
       return false;
     }
   }
@@ -82,9 +81,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
 
       try {
-        print('🔐 SignupScreen: Starting signup for ${_emailController.text.trim()}');
-        print('🔐 SignupScreen: Selected role: ${_selectedRole.name}');
-        
         // Set signup flag in AuthService to prevent document creation conflicts
         final authService = Provider.of<AuthService>(context, listen: false);
         authService.setSigningUp(true);
@@ -95,11 +91,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           password: _passwordController.text,
         );
 
-        print('✅ SignupScreen: Firebase Auth user created successfully');
-
         // Store user data in Firestore - this is critical
         final userRole = _selectedRole == UserRole.client ? 'client' : 'chef';
-        print('💾 SignupScreen: Saving user data with role: $userRole');
         
         // Create the user document with all necessary fields
         final userData = {
@@ -112,9 +105,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         
         try {
           await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set(userData);
-          print('✅ SignupScreen: User data saved to Firestore successfully');
         } catch (firestoreError) {
-          print('❌ SignupScreen: Firestore error: $firestoreError');
           // Delete the Firebase Auth user if Firestore fails
           await userCredential.user!.delete();
           authService.setSigningUp(false);
@@ -124,9 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         // Try to update the user's display name in Firebase Auth
         try {
           await userCredential.user!.updateDisplayName(_nameController.text.trim());
-          print('✅ SignupScreen: Display name updated successfully');
         } catch (displayNameError) {
-          print('⚠️ SignupScreen: Display name update error (non-critical): $displayNameError');
           // Continue with the signup process even if display name update fails
         }
 
@@ -152,8 +141,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           // Wait a bit more for everything to settle
           await Future.delayed(const Duration(milliseconds: 1000));
           
-          print('🚀 SignupScreen: Navigating to HomeScreen');
-          
           // Navigate to home screen
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -162,8 +149,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
-        print('❌ SignupScreen: Firebase Auth error: ${e.code} - ${e.message}');
-        
         // Reset signup flag on error
         final authService = Provider.of<AuthService>(context, listen: false);
         authService.setSigningUp(false);
@@ -208,10 +193,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } catch (e) {
-        // Debug: Print the actual error
-        print('❌ SignupScreen: Unexpected error: $e');
-        print('❌ SignupScreen: Error type: ${e.runtimeType}');
-        
         // Reset signup flag on error
         final authService = Provider.of<AuthService>(context, listen: false);
         authService.setSigningUp(false);

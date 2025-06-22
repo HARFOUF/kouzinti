@@ -32,14 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        print('🔐 LoginScreen: Attempting login for ${_emailController.text.trim()}');
-        
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
-        
-        print('✅ LoginScreen: Firebase Auth login successful');
         
         if (mounted) {
           // Show success message
@@ -57,8 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
           // Wait a bit longer for AuthService to process the state change
           await Future.delayed(const Duration(milliseconds: 1000));
           
-          print('🚀 LoginScreen: Navigating to HomeScreen');
-          
           // Use pushReplacement to replace the login screen
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -67,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
-        print('❌ LoginScreen: Firebase Auth error: ${e.code} - ${e.message}');
         String errorMessage = 'An error occurred during login.';
         
         switch (e.code) {
@@ -114,7 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
-        print('❌ LoginScreen: Unexpected error: $e');
         String errorMessage = 'An unexpected error occurred.';
         
         // Handle reCAPTCHA configuration errors

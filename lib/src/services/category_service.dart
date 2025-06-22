@@ -12,7 +12,6 @@ class CategoryService {
         .orderBy('name')
         .snapshots()
         .handleError((error) {
-          print('Error fetching categories: $error');
           throw Exception('Failed to load categories. Please try again.');
         })
         .map((snapshot) {
@@ -21,7 +20,6 @@ class CategoryService {
                 .map((doc) => CategoryModel.fromMap(doc.data(), doc.id))
                 .toList();
           } catch (e) {
-            print('Error parsing categories: $e');
             throw Exception('Failed to parse category data. Please try again.');
           }
         });
@@ -36,7 +34,6 @@ class CategoryService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .handleError((error) {
-          print('Error fetching dishes by category: $error');
           throw Exception('Failed to load category dishes. Please try again.');
         })
         .map((snapshot) {
@@ -45,7 +42,6 @@ class CategoryService {
                 .map((doc) => DishModel.fromFirestore(doc))
                 .toList();
           } catch (e) {
-            print('Error parsing category dishes: $e');
             throw Exception('Failed to parse category dish data. Please try again.');
           }
         });
@@ -60,7 +56,6 @@ class CategoryService {
         .limit(limit)
         .snapshots()
         .handleError((error) {
-          print('Error fetching popular dishes: $error');
           throw Exception('Failed to load popular dishes. Please try again.');
         })
         .map((snapshot) {
@@ -69,7 +64,6 @@ class CategoryService {
                 .map((doc) => DishModel.fromFirestore(doc))
                 .toList();
           } catch (e) {
-            print('Error parsing popular dishes: $e');
             throw Exception('Failed to parse popular dish data. Please try again.');
           }
         });
@@ -84,7 +78,6 @@ class CategoryService {
       }
       return null;
     } catch (e) {
-      print('Error fetching category by ID: $e');
       throw Exception('Failed to load category details. Please try again.');
     }
   }
@@ -95,7 +88,6 @@ class CategoryService {
       // Check if categories already exist
       final existingCategories = await _firestore.collection('categories').get();
       if (existingCategories.docs.isNotEmpty) {
-        print('Categories already exist, skipping initialization');
         return;
       }
 
@@ -128,9 +120,7 @@ class CategoryService {
       }
 
       await batch.commit();
-      print('Algerian categories initialized successfully');
     } catch (e) {
-      print('Error initializing categories: $e');
       throw Exception('Failed to initialize categories: $e');
     }
   }
@@ -154,7 +144,6 @@ class CategoryService {
 
       return categoryCounts;
     } catch (e) {
-      print('Error getting category stats: $e');
       return {};
     }
   }

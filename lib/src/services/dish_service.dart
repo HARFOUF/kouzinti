@@ -115,8 +115,6 @@ class DishService {
         // .orderBy('createdAt', descending: true)
         .snapshots()
         .handleError((error) {
-          // Log error for debugging
-          print('❌ DishService: Error fetching dishes: $error');
           throw Exception('Failed to load dishes. Please try again.');
         })
         .map((snapshot) {
@@ -126,7 +124,6 @@ class DishService {
                 .toList();
             return dishes;
           } catch (e) {
-            print('❌ DishService: Error parsing dishes: $e');
             throw Exception('Failed to parse dish data. Please try again.');
           }
         });
@@ -140,7 +137,6 @@ class DishService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .handleError((error) {
-          print('Error fetching chef dishes: $error');
           throw Exception('Failed to load chef dishes. Please try again.');
         })
         .map((snapshot) {
@@ -149,7 +145,6 @@ class DishService {
                 .map((doc) => DishModel.fromFirestore(doc))
                 .toList();
           } catch (e) {
-            print('Error parsing chef dishes: $e');
             throw Exception('Failed to parse chef dish data. Please try again.');
           }
         });
@@ -164,7 +159,6 @@ class DishService {
       }
       return null;
     } catch (e) {
-      print('Error fetching dish by ID: $e');
       throw Exception('Failed to load dish details. Please try again.');
     }
   }
@@ -203,7 +197,6 @@ class DishService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error incrementing order count: $e');
       // Don't throw error for this as it's not critical
     }
   }
@@ -222,7 +215,6 @@ class DishService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .handleError((error) {
-          print('Error searching dishes: $error');
           throw Exception('Failed to search dishes. Please try again.');
         })
         .map((snapshot) {
@@ -234,7 +226,6 @@ class DishService {
                     dish.category.toLowerCase().contains(searchQuery))
                 .toList();
           } catch (e) {
-            print('Error parsing search results: $e');
             throw Exception('Failed to parse search results. Please try again.');
           }
         });

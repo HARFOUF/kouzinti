@@ -44,7 +44,6 @@ class DishModel {
         createdAt: data['createdAt'] ?? Timestamp.now(),
       );
     } catch (e) {
-      print('❌ DishModel: Error parsing dish ${doc.id}: $e');
       rethrow;
     }
   }
