@@ -155,7 +155,7 @@ class CategoryDishesScreen extends StatelessWidget {
                     maxCrossAxisExtent: 200.0,
                     crossAxisSpacing: 16.0,
                     mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.65, // Fixed: Increased height for cards
+                    childAspectRatio: 0.62, // Fixed: Increased height for cards
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {

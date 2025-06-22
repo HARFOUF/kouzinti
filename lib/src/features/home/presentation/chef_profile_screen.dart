@@ -116,7 +116,7 @@ class ChefProfileScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 12.0,
                     mainAxisSpacing: 12.0,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.6,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
