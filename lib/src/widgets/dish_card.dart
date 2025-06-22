@@ -75,8 +75,11 @@ class DishCard extends StatelessWidget {
                     )
                   : _buildPlaceholderImage(),
             ),
-            // Content Section with flexible height
-            Expanded(
+            // Content Section with minimum height to prevent cropping
+            Container(
+              constraints: const BoxConstraints(
+                minHeight: 120, // Minimum height to prevent content cropping
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(

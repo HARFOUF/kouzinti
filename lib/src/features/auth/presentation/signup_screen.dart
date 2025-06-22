@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kouzinti/src/features/home/presentation/home_screen.dart';
+import 'package:kouzinti/src/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:kouzinti/src/services/auth_service.dart';
 
 enum UserRole { client, chef }
 
@@ -19,6 +22,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   UserRole _selectedRole = UserRole.client;
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _isCheckingEmail = false;
 
   @override
   void dispose() {
@@ -28,6 +33,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  // Check if email already exists
+  Future<bool> _checkEmailExists(String email) async {
+    try {
+      final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+      return methods.isNotEmpty;
+    } catch (e) {
+      debugPrint('Error checking email: $e');
+      return false;
+    }
+  }
+
+  // Email validation with existence check
+  Future<String?> _validateEmail(String? value) async {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    
+    // Basic email format validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Please enter a valid email address';
+    }
+
+    // Check if email already exists
+    setState(() {
+      _isCheckingEmail = true;
+    });
+
+    try {
+      final emailExists = await _checkEmailExists(value);
+      if (emailExists) {
+        return 'An account with this email already exists. Please use a different email or try logging in.';
+      }
+    } finally {
+      setState(() {
+        _isCheckingEmail = false;
+      });
+    }
+
+    return null;
+  }
+
   Future<void> _signUp() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -35,44 +82,77 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
 
       try {
+        print('🔐 SignupScreen: Starting signup for ${_emailController.text.trim()}');
+        print('🔐 SignupScreen: Selected role: ${_selectedRole.name}');
+        
+        // Set signup flag in AuthService to prevent document creation conflicts
+        final authService = Provider.of<AuthService>(context, listen: false);
+        authService.setSigningUp(true);
+        
         // Create user with Firebase Auth
         final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
 
-        // Try to store additional user data in Firestore (but don't fail if it doesn't work)
+        print('✅ SignupScreen: Firebase Auth user created successfully');
+
+        // Store user data in Firestore - this is critical
+        final userRole = _selectedRole == UserRole.client ? 'client' : 'chef';
+        print('💾 SignupScreen: Saving user data with role: $userRole');
+        
+        // Create the user document with all necessary fields
+        final userData = {
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'role': userRole,
+          'createdAt': FieldValue.serverTimestamp(),
+          'profilePictureUrl': null,
+        };
+        
         try {
-          await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-            'name': _nameController.text.trim(),
-            'email': _emailController.text.trim(),
-            'role': _selectedRole == UserRole.client ? 'client' : 'chef',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+          await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set(userData);
+          print('✅ SignupScreen: User data saved to Firestore successfully');
         } catch (firestoreError) {
-          debugPrint('Firestore error (non-critical): $firestoreError');
-          // Continue with the signup process even if Firestore fails
+          print('❌ SignupScreen: Firestore error: $firestoreError');
+          // Delete the Firebase Auth user if Firestore fails
+          await userCredential.user!.delete();
+          authService.setSigningUp(false);
+          throw Exception('Failed to save user data. Please try again.');
         }
 
-        // Try to update the user's display name in Firebase Auth (but don't fail if it doesn't work)
+        // Try to update the user's display name in Firebase Auth
         try {
           await userCredential.user!.updateDisplayName(_nameController.text.trim());
+          print('✅ SignupScreen: Display name updated successfully');
         } catch (displayNameError) {
-          debugPrint('Display name update error (non-critical): $displayNameError');
+          print('⚠️ SignupScreen: Display name update error (non-critical): $displayNameError');
           // Continue with the signup process even if display name update fails
         }
 
         if (mounted) {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Account created successfully!'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text('Account created successfully as ${_selectedRole.name}!'),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           
-          // Refresh user data to ensure it's properly loaded
+          // Wait a bit for Firestore to be ready
           await Future.delayed(const Duration(milliseconds: 500));
+          
+          // Force refresh user data
+          await authService.refreshUserData();
+          
+          // Wait a bit more for everything to settle
+          await Future.delayed(const Duration(milliseconds: 1000));
+          
+          print('🚀 SignupScreen: Navigating to HomeScreen');
           
           // Navigate to home screen
           Navigator.of(context).pushReplacement(
@@ -82,65 +162,80 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
+        print('❌ SignupScreen: Firebase Auth error: ${e.code} - ${e.message}');
+        
+        // Reset signup flag on error
+        final authService = Provider.of<AuthService>(context, listen: false);
+        authService.setSigningUp(false);
+        
         String errorMessage = 'An error occurred during sign up.';
         
-        if (e.code == 'weak-password') {
-          errorMessage = 'The password provided is too weak.';
-        } else if (e.code == 'email-already-in-use') {
-          errorMessage = 'An account already exists for that email.';
-        } else if (e.code == 'invalid-email') {
-          errorMessage = 'Invalid email address.';
-        } else if (e.code == 'operation-not-allowed') {
-          errorMessage = 'Email/password accounts are not enabled. Please contact support.';
-        } else if (e.message?.contains('CONFIGURATION_NOT_FOUND') == true) {
-          errorMessage = 'Authentication configuration error. Please try again or contact support.';
+        switch (e.code) {
+          case 'weak-password':
+            errorMessage = 'The password provided is too weak. Please use at least 6 characters.';
+            break;
+          case 'email-already-in-use':
+            errorMessage = 'An account already exists for that email. Please use a different email or try logging in.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'Please enter a valid email address.';
+            break;
+          case 'operation-not-allowed':
+            errorMessage = 'Email/password accounts are not enabled. Please contact support.';
+            break;
+          case 'network-request-failed':
+            errorMessage = 'Network error. Please check your internet connection.';
+            break;
+          default:
+            if (e.message?.contains('CONFIGURATION_NOT_FOUND') == true) {
+              errorMessage = 'Authentication configuration error. Please try again or contact support.';
+            } else {
+              errorMessage = 'Sign up failed. Please try again.';
+            }
         }
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage)),
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 4),
+            ),
           );
         }
       } catch (e) {
         // Debug: Print the actual error
-        debugPrint('Signup catch block error: $e');
-        debugPrint('Error type: ${e.runtimeType}');
+        print('❌ SignupScreen: Unexpected error: $e');
+        print('❌ SignupScreen: Error type: ${e.runtimeType}');
         
-        // Check if the error is actually a success (user was created)
-        if (e.toString().contains('CONFIGURATION_NOT_FOUND') || 
-            e.toString().contains('unavailable') ||
-            e.toString().contains('PERMISSION_DENIED') ||
-            e.toString().contains('PigeonUserDetails')) {
-          // These are not actual errors for signup - user was created successfully
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Account created successfully!'),
-                backgroundColor: Colors.green,
+        // Reset signup flag on error
+        final authService = Provider.of<AuthService>(context, listen: false);
+        authService.setSigningUp(false);
+        
+        String errorMessage = 'An unexpected error occurred.';
+        
+        if (e.toString().contains('network')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (e.toString().contains('Failed to save user data')) {
+          errorMessage = 'Failed to save user data. Please try again.';
+        }
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-            );
-            
-            await Future.delayed(const Duration(milliseconds: 500));
-            
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              ),
-            );
-          }
-        } else {
-          // This is a real error
-          String errorMessage = 'An unexpected error occurred.';
-          
-          if (e.toString().contains('network')) {
-            errorMessage = 'Network error. Please check your internet connection.';
-          }
-          
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorMessage)),
-            );
-          }
+              duration: const Duration(seconds: 4),
+            ),
+          );
         }
       } finally {
         if (mounted) {
@@ -155,111 +250,248 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Sign Up'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+        title: const Text(
+          'Sign Up',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Create an Account',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Full Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'I am a:',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: RadioListTile<UserRole>(
-                        title: const Text('Client'),
-                        value: UserRole.client,
-                        groupValue: _selectedRole,
-                        onChanged: (UserRole? value) {
-                          setState(() {
-                            _selectedRole = value!;
-                          });
-                        },
-                      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Logo or Icon
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
-                    Expanded(
-                      child: RadioListTile<UserRole>(
-                        title: const Text('Chef'),
-                        value: UserRole.chef,
-                        groupValue: _selectedRole,
-                        onChanged: (UserRole? value) {
-                          setState(() {
-                            _selectedRole = value!;
-                          });
-                        },
-                      ),
+                    child: Icon(
+                      Icons.person_add,
+                      size: 60,
+                      color: AppColors.primary,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                if (_isLoading)
-                  const Center(child: CircularProgressIndicator())
-                else
-                  ElevatedButton(
-                    onPressed: _signUp,
-                    child: const Text('Sign Up'),
                   ),
-              ],
+                  const SizedBox(height: 32),
+                  Text(
+                    'Create an Account',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Join our community of food lovers',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Full Name',
+                      prefixIcon: const Icon(Icons.person_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      if (value.trim().length < 2) {
+                        return 'Name must be at least 2 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      suffixIcon: _isCheckingEmail 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (value) {
+                      // Trigger validation when email changes
+                      if (value.isNotEmpty) {
+                        _validateEmail(value);
+                      }
+                    },
+                    validator: (value) {
+                      // Basic validation only - async validation is handled separately
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                    ),
+                    obscureText: _obscurePassword,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'I am a:',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: RadioListTile<UserRole>(
+                            title: const Text('Client'),
+                            value: UserRole.client,
+                            groupValue: _selectedRole,
+                            activeColor: AppColors.primary,
+                            onChanged: (UserRole? value) {
+                              setState(() {
+                                _selectedRole = value!;
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: RadioListTile<UserRole>(
+                            title: const Text('Chef'),
+                            value: UserRole.chef,
+                            groupValue: _selectedRole,
+                            activeColor: AppColors.primary,
+                            onChanged: (UserRole? value) {
+                              setState(() {
+                                _selectedRole = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  if (_isLoading)
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    )
+                  else
+                    ElevatedButton(
+                      onPressed: _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

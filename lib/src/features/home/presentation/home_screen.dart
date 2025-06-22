@@ -396,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
             final dishes = currentUser != null 
                 ? allDishes.where((dish) => dish.chefId != currentUser.id).toList()
                 : allDishes;
-
+            
             if (dishes.isEmpty) {
               return SliverToBoxAdapter(
                 child: Padding(
