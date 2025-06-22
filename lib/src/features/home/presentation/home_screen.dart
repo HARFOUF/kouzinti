@@ -11,7 +11,6 @@ import 'package:kouzinti/src/services/auth_service.dart';
 import 'package:kouzinti/src/services/category_service.dart';
 import 'package:kouzinti/src/widgets/dish_card.dart';
 import 'package:kouzinti/src/widgets/category_card.dart';
-import 'package:kouzinti/src/widgets/error_widget.dart';
 import 'package:kouzinti/src/widgets/empty_state_widget.dart';
 import 'package:kouzinti/src/constants/app_colors.dart';
 
@@ -183,60 +182,88 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        return CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Search Results (${searchResults.length})',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+        return FutureBuilder<UserModel?>(
+          future: _authService.getCurrentUser(),
+          builder: (context, userSnapshot) {
+            // Show loading while fetching user data
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            // Show error if user data fetch fails
+            if (userSnapshot.hasError) {
+              return Center(
+                child: ErrorStateWidget(
+                  message: 'Failed to load user data: ${userSnapshot.error}',
+                  onRetry: () {
+                    // Force rebuild to retry
+                  },
+                ),
+              );
+            }
+
+            // Only render search results after we have user data
+            final currentUser = userSnapshot.data;
+            
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Search Results (${searchResults.length})',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.7, // Fixed: Increased height for cards
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final dish = searchResults[index];
-                    return DishCard(
-                      dish: dish,
-                      onTap: () async {
-                        // Fetch the actual chef's name
-                        final chef = await _authService.getUserById(dish.chefId);
-                        final chefName = chef?.name ?? 'Unknown Chef';
-                        if (context.mounted) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ChefProfileScreen(
-                                chefId: dish.chefId,
-                                chefName: chefName,
-                              ),
-                            ),
-                          );
-                        }
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.7, // Fixed: Increased height for cards
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final dish = searchResults[index];
+                        final isCurrentUserChef = currentUser?.id == dish.chefId;
+                        return DishCard(
+                          dish: dish,
+                          onTap: () async {
+                            // Fetch the actual chef's name
+                            final chef = await _authService.getUserById(dish.chefId);
+                            final chefName = chef?.name ?? 'Unknown Chef';
+                            if (context.mounted) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChefProfileScreen(
+                                    chefId: dish.chefId,
+                                    chefName: chefName,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          canAddToCart: !isCurrentUserChef, // Chef can't order their own dishes
+                        );
                       },
-                      canAddToCart: true,
-                    );
-                  },
-                  childCount: searchResults.length,
+                      childCount: searchResults.length,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 20),
-            ),
-          ],
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 20),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -404,41 +431,75 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             }
 
-            return SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.62, // Fixed: Increased height for cards
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final dish = allDishes[index];
-                    return DishCard(
-                      dish: dish,
-                      onTap: () async {
-                        // Fetch the actual chef's name
-                        final chef = await _authService.getUserById(dish.chefId);
-                        final chefName = chef?.name ?? 'Unknown Chef';
-                        if (context.mounted) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ChefProfileScreen(
-                                chefId: dish.chefId,
-                                chefName: chefName,
-                              ),
-                            ),
-                          );
-                        }
+            return FutureBuilder<UserModel?>(
+              future: _authService.getCurrentUser(),
+              builder: (context, userSnapshot) {
+                // Show loading while fetching user data
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+
+                // Show error if user data fetch fails
+                if (userSnapshot.hasError) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: ErrorStateWidget(
+                        message: 'Failed to load user data: ${userSnapshot.error}',
+                        onRetry: () {
+                          // Force rebuild to retry
+                        },
+                      ),
+                    ),
+                  );
+                }
+
+                // Only render dishes after we have user data
+                final currentUser = userSnapshot.data;
+                
+                return SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.62, // Fixed: Increased height for cards
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final dish = allDishes[index];
+                        final isCurrentUserChef = currentUser?.id == dish.chefId;
+                        return DishCard(
+                          dish: dish,
+                          onTap: () async {
+                            // Fetch the actual chef's name
+                            final chef = await _authService.getUserById(dish.chefId);
+                            final chefName = chef?.name ?? 'Unknown Chef';
+                            if (context.mounted) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChefProfileScreen(
+                                    chefId: dish.chefId,
+                                    chefName: chefName,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          canAddToCart: !isCurrentUserChef, // Chef can't order their own dishes
+                        );
                       },
-                      canAddToCart: true,
-                    );
-                  },
-                  childCount: allDishes.length,
-                ),
-              ),
+                      childCount: allDishes.length,
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),

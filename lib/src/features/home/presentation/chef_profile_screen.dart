@@ -109,23 +109,46 @@ class ChefProfileScreen extends StatelessWidget {
                 );
               }
 
-              return SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12.0,
-                    mainAxisSpacing: 12.0,
-                    childAspectRatio: 0.6,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final dish = dishes[index];
-                      return FutureBuilder<UserModel?>(
-                        future: authService.getCurrentUser(),
-                        builder: (context, userSnapshot) {
-                          final currentUser = userSnapshot.data;
-                          final isCurrentUserChef = currentUser?.id == chefId;
+              return FutureBuilder<UserModel?>(
+                future: authService.getCurrentUser(),
+                builder: (context, userSnapshot) {
+                  // Show loading while fetching user data
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const SliverFillRemaining(
+                      child: LoadingStateWidget(
+                        message: 'Loading user data...',
+                      ),
+                    );
+                  }
+
+                  // Show error if user data fetch fails
+                  if (userSnapshot.hasError) {
+                    return SliverFillRemaining(
+                      child: NetworkErrorWidget(
+                        customMessage: 'Failed to load user data: ${userSnapshot.error}',
+                        onRetry: () {
+                          // Force rebuild to retry
+                        },
+                      ),
+                    );
+                  }
+
+                  // Only render dishes after we have user data
+                  final currentUser = userSnapshot.data;
+                  final isCurrentUserChef = currentUser?.id == chefId;
+                  
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12.0,
+                        mainAxisSpacing: 12.0,
+                        childAspectRatio: 0.6,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final dish = dishes[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
                             child: DishCard(
@@ -138,11 +161,11 @@ class ChefProfileScreen extends StatelessWidget {
                             ),
                           );
                         },
-                      );
-                    },
-                    childCount: dishes.length,
-                  ),
-                ),
+                        childCount: dishes.length,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),

@@ -8,6 +8,7 @@ import 'package:kouzinti/src/widgets/error_widget.dart';
 import 'package:kouzinti/src/widgets/empty_state_widget.dart';
 import 'package:kouzinti/src/constants/app_colors.dart';
 import 'package:kouzinti/src/features/home/presentation/chef_profile_screen.dart';
+import 'package:kouzinti/src/models/user_model.dart';
 
 class CategoryDishesScreen extends StatelessWidget {
   final CategoryModel category;
@@ -148,41 +149,71 @@ class CategoryDishesScreen extends StatelessWidget {
                 );
               }
 
-              return SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200.0,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.62, // Fixed: Increased height for cards
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final dish = dishes[index];
-                      return FutureBuilder<String>(
-                        future: _getChefName(dish.chefId),
-                        builder: (context, chefSnapshot) {
-                          return DishCard(
-                            dish: dish,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ChefProfileScreen(
-                                    chefId: dish.chefId,
-                                    chefName: chefSnapshot.data ?? 'Chef',
-                                  ),
-                                ),
+              return FutureBuilder<UserModel?>(
+                future: _getCurrentUser(),
+                builder: (context, userSnapshot) {
+                  // Show loading while fetching user data
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const SliverFillRemaining(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  // Show error if user data fetch fails
+                  if (userSnapshot.hasError) {
+                    return SliverFillRemaining(
+                      child: NetworkErrorWidget(
+                        customMessage: 'Failed to load user data: ${userSnapshot.error}',
+                        onRetry: () {
+                          // Force rebuild to retry
+                        },
+                      ),
+                    );
+                  }
+
+                  // Only render dishes after we have user data
+                  final currentUser = userSnapshot.data;
+                  
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                    sliver: SliverGrid(
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200.0,
+                        crossAxisSpacing: 16.0,
+                        mainAxisSpacing: 16.0,
+                        childAspectRatio: 0.62, // Fixed: Increased height for cards
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final dish = dishes[index];
+                          final isCurrentUserChef = currentUser?.id == dish.chefId;
+                          return FutureBuilder<String>(
+                            future: _getChefName(dish.chefId),
+                            builder: (context, chefSnapshot) {
+                              return DishCard(
+                                dish: dish,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ChefProfileScreen(
+                                        chefId: dish.chefId,
+                                        chefName: chefSnapshot.data ?? 'Chef',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                canAddToCart: !isCurrentUserChef, // Chef can't order their own dishes
                               );
                             },
-                            canAddToCart: true,
                           );
                         },
-                      );
-                    },
-                    childCount: dishes.length,
-                  ),
-                ),
+                        childCount: dishes.length,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -202,5 +233,10 @@ class CategoryDishesScreen extends StatelessWidget {
     } catch (e) {
       return 'Unknown Chef';
     }
+  }
+
+  Future<UserModel?> _getCurrentUser() async {
+    final authService = AuthService();
+    return await authService.getCurrentUser();
   }
 }
