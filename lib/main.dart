@@ -7,6 +7,7 @@ import 'package:kouzinti/src/features/auth/presentation/login_screen.dart';
 import 'package:kouzinti/src/features/home/presentation/home_screen.dart';
 import 'package:kouzinti/src/services/auth_service.dart';
 import 'package:kouzinti/src/services/cart_service.dart';
+import 'package:kouzinti/src/widgets/dynamic_logo.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -92,18 +93,12 @@ class SplashScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  'assets/images/app_logo.png',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.restaurant,
-                      size: 60,
-                      color: AppColors.primary,
-                    );
-                  },
+              child: const DynamicLogo(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                errorWidget: Icon(
+                  Icons.restaurant,
+                  size: 60,
+                  color: AppColors.primary,
                 ),
               ),
             ),
