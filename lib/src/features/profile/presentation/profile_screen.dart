@@ -269,57 +269,6 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                     },
                   ),
                   const Divider(),
-                  // Sample data generation button (for testing)
-                  ListTile(
-                    leading: const Icon(Icons.data_usage, color: Colors.blue),
-                    title: const Text('Generate Algerian Sample Data', style: TextStyle(color: Colors.blue)),
-                    subtitle: const Text('Add 5 Algerian chefs and 25 traditional dishes'),
-                    onTap: () async {
-                      // Show confirmation dialog
-                      final shouldGenerate = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Generate Algerian Sample Data'),
-                          content: const Text('This will add 5 Algerian chefs and 25 traditional Algerian dishes to the database. Continue?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text('Generate'),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (shouldGenerate == true) {
-                        try {
-                          final sampleDataService = SampleDataService();
-                          await sampleDataService.generateSampleData();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Algerian sample data generated successfully!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error generating sample data: $e'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        }
-                      }
-                    },
-                  ),
-                  const Divider(),
                   ListTile(
                     leading: const Icon(Icons.logout, color: Colors.red),
                     title: const Text('Logout', style: TextStyle(color: Colors.red)),
