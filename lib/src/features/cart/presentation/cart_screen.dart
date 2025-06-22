@@ -51,7 +51,7 @@ class CartScreen extends StatelessWidget {
                                     : null,
                               ),
                               title: Text(cartItem.dish.name),
-                              subtitle: Text('Total: \$${(cartItem.totalPrice).toStringAsFixed(2)}'),
+                              subtitle: Text('Total: ${(cartItem.totalPrice).toStringAsFixed(0)} DZD'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -86,7 +86,7 @@ class CartScreen extends StatelessWidget {
                   const Text('Total', style: TextStyle(fontSize: 20)),
                   Chip(
                     label: Text(
-                      '\$${cart.totalAmount.toStringAsFixed(2)}',
+                      '${cart.totalAmount.toStringAsFixed(0)} DZD',
                       style: TextStyle(
                         color: Theme.of(context).primaryTextTheme.titleLarge?.color,
                       ),

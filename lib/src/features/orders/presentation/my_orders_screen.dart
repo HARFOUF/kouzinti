@@ -68,13 +68,7 @@ class MyOrdersScreen extends StatelessWidget {
           final orders = snapshot.data ?? [];
 
           if (orders.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No Orders Yet',
-              message: 'You haven\'t placed any orders yet. Start exploring delicious dishes!',
-              icon: Icons.receipt_long_outlined,
-              iconColor: Colors.grey,
-              backgroundColor: Colors.grey,
-            );
+            return const EmptyOrdersWidget();
           }
 
           return Column(

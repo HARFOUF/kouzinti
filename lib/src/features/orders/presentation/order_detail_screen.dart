@@ -98,7 +98,7 @@ class OrderDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Total: \$${order.total.toStringAsFixed(2)}',
+                          'Total: ${order.total.toStringAsFixed(0)} DZD',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -158,7 +158,7 @@ class OrderDetailScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '\$${item.totalPrice.toStringAsFixed(2)}',
+                          '${item.totalPrice.toStringAsFixed(0)} DZD',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,

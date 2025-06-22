@@ -77,20 +77,14 @@ class ManageDishesScreen extends StatelessWidget {
 
           if (dishes.isEmpty) {
             return Center(
-              child: EmptyStateWidget(
-                title: 'No Dishes Yet',
-                message: 'Start by adding your first delicious dish to showcase your culinary skills!',
-                icon: Icons.restaurant_outlined,
-                iconColor: AppColors.primary,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                onActionPressed: () {
+              child: EmptyDishesWidget(
+                onAddDish: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const EditDishScreen(),
                     ),
                   );
                 },
-                actionText: 'Add First Dish',
               ),
             );
           }
@@ -252,7 +246,7 @@ class ManageDishesScreen extends StatelessWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              '\$${dish.price.toStringAsFixed(2)}',
+                                              '${dish.price.toStringAsFixed(0)} DZD',
                                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: AppColors.primary,

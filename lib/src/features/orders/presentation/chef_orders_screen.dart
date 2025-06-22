@@ -60,13 +60,7 @@ class ChefOrdersScreen extends StatelessWidget {
           final orders = snapshot.data ?? [];
 
           if (orders.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No Incoming Orders',
-              message: 'You don\'t have any orders yet. Keep cooking delicious dishes!',
-              icon: Icons.restaurant_outlined,
-              iconColor: Colors.grey,
-              backgroundColor: Colors.grey,
-            );
+            return const EmptyIncomingOrdersWidget();
           }
 
           return ListView.builder(
@@ -136,7 +130,7 @@ class ChefOrdersScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Total: \$${order.total.toStringAsFixed(2)}',
+                              'Total: ${order.total.toStringAsFixed(0)} DZD',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,

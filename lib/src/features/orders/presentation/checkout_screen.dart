@@ -95,13 +95,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ...items.map((item) => ListTile(
                 title: Text(item.dish.name),
                 subtitle: Text('Quantity: ${item.quantity}'),
-                trailing: Text('\$${item.totalPrice.toStringAsFixed(2)}'),
+                trailing: Text('${item.totalPrice.toStringAsFixed(0)} DZD'),
               )),
               const Divider(),
               ListTile(
                 title: const Text('Total'),
                 trailing: Text(
-                  '\$${cartService.totalAmount.toStringAsFixed(2)}',
+                  '${cartService.totalAmount.toStringAsFixed(0)} DZD',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

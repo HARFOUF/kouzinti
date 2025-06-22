@@ -230,9 +230,10 @@ class _EditDishScreenState extends State<EditDishScreen> {
               TextFormField(
                 controller: _priceController,
                 decoration: const InputDecoration(
-                  labelText: 'Price ( 24)',
+                  labelText: 'Price (DZD)',
                   border: OutlineInputBorder(),
-                  prefixText: ' 24',
+                  prefixText: 'DZD ',
+                  hintText: 'Enter price in DZD',
                 ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {

@@ -96,18 +96,18 @@ class CategoryDishesScreen extends StatelessWidget {
                   Text(
                     'About ${category.name}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     category.description,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -119,8 +119,8 @@ class CategoryDishesScreen extends StatelessWidget {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(
-                  child: LoadingStateWidget(
-                    message: 'Loading category dishes...',
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
                 );
               }
@@ -129,9 +129,7 @@ class CategoryDishesScreen extends StatelessWidget {
                 return SliverFillRemaining(
                   child: NetworkErrorWidget(
                     customMessage: 'Failed to load dishes: ${snapshot.error}',
-                    onRetry: () {
-                      // The stream will automatically retry when the widget rebuilds
-                    },
+                    onRetry: () {},
                   ),
                 );
               }
@@ -151,13 +149,13 @@ class CategoryDishesScreen extends StatelessWidget {
               }
 
               return SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200.0,
                     crossAxisSpacing: 16.0,
                     mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.65, // Fixed: Increased height for cards
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -168,7 +166,6 @@ class CategoryDishesScreen extends StatelessWidget {
                           return DishCard(
                             dish: dish,
                             onTap: () {
-                              // Navigate to chef profile
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => ChefProfileScreen(
@@ -206,4 +203,4 @@ class CategoryDishesScreen extends StatelessWidget {
       return 'Unknown Chef';
     }
   }
-} 
+}

@@ -28,20 +28,25 @@ class DishModel {
   });
 
   factory DishModel.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
-    return DishModel(
-      id: doc.id,
-      name: data['name'] ?? '',
-      description: data['description'] ?? '',
-      price: (data['price'] ?? 0.0).toDouble(),
-      imageUrl: data['imageUrl'],
-      category: data['category'] ?? '',
-      categoryId: data['categoryId'] ?? '',
-      chefId: data['chefId'] ?? '',
-      isAvailable: data['isAvailable'] ?? true,
-      orderCount: data['orderCount'] ?? 0,
-      createdAt: data['createdAt'] ?? Timestamp.now(),
-    );
+    try {
+      Map data = doc.data() as Map<String, dynamic>;
+      return DishModel(
+        id: doc.id,
+        name: data['name'] ?? '',
+        description: data['description'] ?? '',
+        price: (data['price'] ?? 0.0).toDouble(),
+        imageUrl: data['imageUrl'],
+        category: data['category'] ?? '',
+        categoryId: data['categoryId'] ?? '',
+        chefId: data['chefId'] ?? '',
+        isAvailable: data['isAvailable'] ?? true,
+        orderCount: data['orderCount'] ?? 0,
+        createdAt: data['createdAt'] ?? Timestamp.now(),
+      );
+    } catch (e) {
+      print('❌ DishModel: Error parsing dish ${doc.id}: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toMap() {

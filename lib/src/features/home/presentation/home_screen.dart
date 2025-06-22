@@ -170,19 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final searchResults = snapshot.data ?? [];
         
-        // Filter out dishes created by the current user
-        final filteredResults = currentUser != null 
-            ? searchResults.where((dish) => dish.chefId != currentUser.id).toList()
-            : searchResults;
-
-        if (filteredResults.isEmpty) {
+        if (searchResults.isEmpty) {
           return Center(
             child: EmptyStateWidget(
               title: 'No Results Found',
               message: 'Try searching for different dishes or categories.',
               icon: Icons.search_off_outlined,
-              iconColor: Colors.grey,
-              backgroundColor: Colors.grey[50],
+              iconColor: Colors.grey.shade400,
+              backgroundColor: Colors.grey.shade50,
               showAnimation: false,
             ),
           );
@@ -194,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Search Results (${filteredResults.length})',
+                  'Search Results (${searchResults.length})',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -209,11 +204,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.7, // Fixed: Increased height for cards
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final dish = filteredResults[index];
+                    final dish = searchResults[index];
                     return DishCard(
                       dish: dish,
                       onTap: () async {
@@ -234,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       canAddToCart: true,
                     );
                   },
-                  childCount: filteredResults.length,
+                  childCount: searchResults.length,
                 ),
               ),
             ),
@@ -277,21 +272,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        StreamBuilder<List<CategoryModel>>(
-          stream: _categoryService.getAllCategories(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverToBoxAdapter(
-                child: Padding(
+        SliverToBoxAdapter(
+          child: StreamBuilder<List<CategoryModel>>(
+            stream: _categoryService.getAllCategories(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
                   padding: EdgeInsets.all(16),
                   child: Center(child: CircularProgressIndicator()),
-                ),
-              );
-            }
+                );
+              }
 
-            if (snapshot.hasError) {
-              return SliverToBoxAdapter(
-                child: Padding(
+              if (snapshot.hasError) {
+                return Padding(
                   padding: const EdgeInsets.all(16),
                   child: ErrorStateWidget(
                     message: 'Failed to load categories: ${snapshot.error}',
@@ -299,15 +292,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Stream will automatically retry
                     },
                   ),
-                ),
-              );
-            }
+                );
+              }
 
-            final categories = snapshot.data ?? [];
+              final categories = snapshot.data ?? [];
 
-            if (categories.isEmpty) {
-              return SliverToBoxAdapter(
-                child: Padding(
+              if (categories.isEmpty) {
+                return Padding(
                   padding: const EdgeInsets.all(16),
                   child: EmptyStateWidget(
                     title: 'No Categories Available',
@@ -317,12 +308,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Colors.grey[50],
                     showAnimation: false,
                   ),
-                ),
-              );
-            }
+                );
+              }
 
-            return SliverToBoxAdapter(
-              child: SizedBox(
+              return SizedBox(
                 height: 120,
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -346,9 +335,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
 
         // All Dishes Section
@@ -392,21 +381,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
             final allDishes = snapshot.data ?? [];
             
-            // Filter out dishes created by the current user
-            final dishes = currentUser != null 
-                ? allDishes.where((dish) => dish.chefId != currentUser.id).toList()
-                : allDishes;
-            
-            if (dishes.isEmpty) {
+            if (allDishes.isEmpty) {
               return SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
                   child: EmptyStateWidget(
                     title: 'No Dishes Available',
-                    message: 'Check back later for delicious dishes from our talented chefs!',
+                    message: 'Our chefs are preparing delicious dishes for you! Check back soon or try refreshing the page.',
                     icon: Icons.restaurant_outlined,
-                    iconColor: Colors.grey,
-                    backgroundColor: Colors.grey[50],
+                    iconColor: Colors.orange.shade400,
+                    backgroundColor: Colors.orange.shade50,
                     onActionPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
@@ -427,11 +411,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.62, // Fixed: Increased height for cards
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final dish = dishes[index];
+                    final dish = allDishes[index];
                     return DishCard(
                       dish: dish,
                       onTap: () async {
@@ -452,7 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       canAddToCart: true,
                     );
                   },
-                  childCount: dishes.length,
+                  childCount: allDishes.length,
                 ),
               ),
             );
@@ -464,4 +448,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-} 
+}

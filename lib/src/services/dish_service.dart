@@ -111,20 +111,22 @@ class DishService {
     return _firestore
         .collection('dishes')
         .where('isAvailable', isEqualTo: true)
-        .orderBy('createdAt', descending: true)
+        // Temporarily removing orderBy to test if it's causing index issues
+        // .orderBy('createdAt', descending: true)
         .snapshots()
         .handleError((error) {
           // Log error for debugging
-          print('Error fetching dishes: $error');
+          print('❌ DishService: Error fetching dishes: $error');
           throw Exception('Failed to load dishes. Please try again.');
         })
         .map((snapshot) {
           try {
-            return snapshot.docs
+            final dishes = snapshot.docs
                 .map((doc) => DishModel.fromFirestore(doc))
                 .toList();
+            return dishes;
           } catch (e) {
-            print('Error parsing dishes: $e');
+            print('❌ DishService: Error parsing dishes: $e');
             throw Exception('Failed to parse dish data. Please try again.');
           }
         });
