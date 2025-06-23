@@ -154,18 +154,24 @@ class AuthService extends ChangeNotifier {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       if (!doc.exists) {
+        final displayName = user.displayName;
+        String firstName = 'User';
+        String lastName = '';
+        if (displayName != null && displayName.trim().isNotEmpty) {
+          final parts = displayName.trim().split(' ');
+          firstName = parts.isNotEmpty ? parts.first : '';
+          lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+        }
         final userData = UserModel(
           id: user.uid,
-          firstName: user.displayName?.split(' ').first ?? 'User',
-          lastName: user.displayName?.split(' ').length > 1 ? user.displayName!.split(' ').sublist(1).join(' ') : '',
+          firstName: firstName,
+          lastName: lastName,
           email: user.email ?? '',
           role: 'client',
           profilePictureUrl: user.photoURL,
           createdAt: DateTime.now(),
         );
-        
         await createUserData(userData);
-        
         // Update current user
         _currentUser = userData;
         notifyListeners();
