@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String id;
-  final String name;
+  final String firstName;
+  final String lastName;
   final String email;
   final String role; // 'client' or 'chef'
   final String? profilePictureUrl;
@@ -12,7 +13,8 @@ class UserModel {
 
   UserModel({
     required this.id,
-    required this.name,
+    required this.firstName,
+    required this.lastName,
     required this.email,
     required this.role,
     this.profilePictureUrl,
@@ -22,9 +24,18 @@ class UserModel {
   });
 
   factory UserModel.fromMap(Map<String, dynamic> data, String documentId) {
+    // Backward compatibility: if only 'name' exists, split it
+    String firstName = data['firstName'] ?? '';
+    String lastName = data['lastName'] ?? '';
+    if (firstName.isEmpty && lastName.isEmpty && data['name'] != null) {
+      final parts = (data['name'] as String).trim().split(' ');
+      firstName = parts.isNotEmpty ? parts.first : '';
+      lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    }
     return UserModel(
       id: documentId,
-      name: data['name'] ?? '',
+      firstName: firstName,
+      lastName: lastName,
       email: data['email'] ?? '',
       role: data['role'] ?? 'client',
       profilePictureUrl: data['profilePictureUrl'],
@@ -38,7 +49,8 @@ class UserModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
+      'firstName': firstName,
+      'lastName': lastName,
       'email': email,
       'role': role,
       'profilePictureUrl': profilePictureUrl,

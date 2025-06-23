@@ -17,7 +17,8 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   UserRole _selectedRole = UserRole.client;
@@ -27,7 +28,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -96,7 +98,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         
         // Create the user document with all necessary fields
         final userData = {
-          'name': _nameController.text.trim(),
+          'firstName': _firstNameController.text.trim(),
+          'lastName': _lastNameController.text.trim(),
           'email': _emailController.text.trim(),
           'role': userRole,
           'createdAt': FieldValue.serverTimestamp(),
@@ -114,7 +117,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         // Try to update the user's display name in Firebase Auth
         try {
-          await userCredential.user!.updateDisplayName(_nameController.text.trim());
+          await userCredential.user!.updateDisplayName('${_firstNameController.text.trim()} ${_lastNameController.text.trim()}');
         } catch (displayNameError) {
           // Continue with the signup process even if display name update fails
         }
@@ -286,9 +289,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 48),
                   TextFormField(
-                    controller: _nameController,
+                    controller: _firstNameController,
                     decoration: InputDecoration(
-                      labelText: 'Full Name',
+                      labelText: 'First Name',
                       prefixIcon: const Icon(Icons.person_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -304,10 +307,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your name';
+                        return 'Please enter your first name';
                       }
                       if (value.trim().length < 2) {
-                        return 'Name must be at least 2 characters';
+                        return 'First name must be at least 2 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Last Name',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your last name';
+                      }
+                      if (value.trim().length < 2) {
+                        return 'Last name must be at least 2 characters';
                       }
                       return null;
                     },

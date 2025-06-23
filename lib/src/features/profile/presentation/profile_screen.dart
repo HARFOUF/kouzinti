@@ -191,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> with WidgetsBindingObserv
                               : null,
                         ),
                         const SizedBox(height: 16),
-                        Text(user.name,
+                        Text('${user.firstName} ${user.lastName}',
                             style: Theme.of(context).textTheme.headlineSmall),
                         const SizedBox(height: 8),
                         Text(user.email,

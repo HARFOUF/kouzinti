@@ -224,8 +224,9 @@ class DishCard extends StatelessWidget {
     try {
       final authService = AuthService();
       final chef = await authService.getUserById(chefId);
-      return chef?.name ?? 'Unknown Chef';
-    } catch (_) {
+      if (chef == null) return 'Unknown Chef';
+      return '${chef.firstName} ${chef.lastName}'.trim();
+    } catch (e) {
       return 'Unknown Chef';
     }
   }

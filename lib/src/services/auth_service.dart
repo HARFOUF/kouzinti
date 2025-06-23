@@ -70,9 +70,17 @@ class AuthService extends ChangeNotifier {
   }
 
   void _createFallbackUser(User firebaseUser) {
+    String firstName = 'User';
+    String lastName = '';
+    if (firebaseUser.displayName != null && firebaseUser.displayName!.trim().isNotEmpty) {
+      final parts = firebaseUser.displayName!.trim().split(' ');
+      firstName = parts.isNotEmpty ? parts.first : '';
+      lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    }
     _currentUser = UserModel(
       id: firebaseUser.uid,
-      name: firebaseUser.displayName ?? 'User',
+      firstName: firstName,
+      lastName: lastName,
       email: firebaseUser.email ?? '',
       role: 'client', // Default role for fallback
       profilePictureUrl: firebaseUser.photoURL,
@@ -97,10 +105,13 @@ class AuthService extends ChangeNotifier {
   Future<void> createUserData(UserModel user) async {
     try {
       await _firestore.collection('users').doc(user.id).set({
-        'name': user.name,
+        'firstName': user.firstName,
+        'lastName': user.lastName,
         'email': user.email,
         'role': user.role,
         'profilePictureUrl': user.profilePictureUrl,
+        'phoneNumber': user.phoneNumber,
+        'address': user.address,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -145,7 +156,8 @@ class AuthService extends ChangeNotifier {
       if (!doc.exists) {
         final userData = UserModel(
           id: user.uid,
-          name: user.displayName ?? 'User',
+          firstName: user.displayName?.split(' ').first ?? 'User',
+          lastName: user.displayName?.split(' ').length > 1 ? user.displayName!.split(' ').sublist(1).join(' ') : '',
           email: user.email ?? '',
           role: 'client',
           profilePictureUrl: user.photoURL,
@@ -164,7 +176,8 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> updateProfile({
-    required String name,
+    required String firstName,
+    required String lastName,
     String? phoneNumber,
     String? address,
     String? profilePictureUrl,
@@ -174,7 +187,8 @@ class AuthService extends ChangeNotifier {
 
     try {
       final updateData = <String, dynamic>{
-        'name': name,
+        'firstName': firstName,
+        'lastName': lastName,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 

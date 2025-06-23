@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () async {
                             // Fetch the actual chef's name
                             final chef = await _authService.getUserById(dish.chefId);
-                            final chefName = chef?.name ?? 'Unknown Chef';
+                            final chefName = chef != null ? '${chef.firstName} ${chef.lastName}'.trim() : 'Unknown Chef';
                             if (context.mounted) {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -480,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () async {
                             // Fetch the actual chef's name
                             final chef = await _authService.getUserById(dish.chefId);
-                            final chefName = chef?.name ?? 'Unknown Chef';
+                            final chefName = chef != null ? '${chef.firstName} ${chef.lastName}'.trim() : 'Unknown Chef';
                             if (context.mounted) {
                               Navigator.of(context).push(
                                 MaterialPageRoute(

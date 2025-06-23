@@ -16,31 +16,8 @@ class SampleDataService {
     // Generate 5 Algerian chefs
     final chefs = [
       {
-        'name': 'Chef Fatima Benali',
-        'email': 'fatima.benali@example.com',
-        'role': 'chef',
-        'phoneNumber': '+213-555-0101',
-        'address': '123 Rue Didouche Mourad, Alger, Algérie',
-        'profilePictureUrl': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop&crop=face',
-      },
-      {
-        'name': 'Chef Ahmed Boudiaf',
-        'email': 'ahmed.boudiaf@example.com',
-        'role': 'chef',
-        'phoneNumber': '+213-555-0102',
-        'address': '456 Avenue Krim Belkacem, Oran, Algérie',
-        'profilePictureUrl': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-      },
-      {
-        'name': 'Chef Amina Zerrouki',
-        'email': 'amina.zerrouki@example.com',
-        'role': 'chef',
-        'phoneNumber': '+213-555-0103',
-        'address': '789 Rue de la Liberté, Constantine, Algérie',
-        'profilePictureUrl': 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
-      },
-      {
-        'name': 'Chef Karim Messaoudi',
+        'firstName': 'Karim',
+        'lastName': 'Messaoudi',
         'email': 'karim.messaoudi@example.com',
         'role': 'chef',
         'phoneNumber': '+213-555-0104',
@@ -48,7 +25,8 @@ class SampleDataService {
         'profilePictureUrl': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
       },
       {
-        'name': 'Chef Leila Hamidi',
+        'firstName': 'Leila',
+        'lastName': 'Hamidi',
         'email': 'leila.hamidi@example.com',
         'role': 'chef',
         'phoneNumber': '+213-555-0105',
