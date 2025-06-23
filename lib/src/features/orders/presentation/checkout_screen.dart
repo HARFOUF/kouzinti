@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kouzinti/src/services/cart_service.dart';
 import 'package:kouzinti/src/services/order_service.dart';
 import 'package:provider/provider.dart';
+import 'package:kouzinti/src/services/auth_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -16,6 +17,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _phoneController = TextEditingController();
   final OrderService _orderService = OrderService();
   var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _autoFillUserInfo();
+  }
+
+  Future<void> _autoFillUserInfo() async {
+    final authService = AuthService();
+    final user = await authService.getCurrentUser();
+    if (user != null) {
+      if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
+        _phoneController.text = user.phoneNumber!;
+      }
+      if (user.address != null && user.address!.isNotEmpty) {
+        _addressController.text = user.address!;
+      }
+    }
+    setState(() {}); // To update the UI if needed
+  }
 
   @override
   void dispose() {

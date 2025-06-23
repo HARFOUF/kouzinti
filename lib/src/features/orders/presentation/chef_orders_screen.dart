@@ -133,12 +133,27 @@ class ChefOrdersScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             if (client != null)
-                              Text(
-                                'Client: ${client.firstName} ${client.lastName}',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Client: ${client.firstName} ${client.lastName}',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  if (client.phoneNumber != null && client.phoneNumber!.isNotEmpty)
+                                    Text(
+                                      'Phone: ${client.phoneNumber}',
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  if (client.address != null && client.address!.isNotEmpty)
+                                    Text(
+                                      'Address: ${client.address}',
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                ],
                               ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
